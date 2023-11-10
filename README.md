@@ -37,7 +37,7 @@ docker run --security-opt seccomp=unconfined --name crystallize_test -v $PWD/tar
 python concretized_paths.py --concretized_ids ~/SeriFuzz/results/concretization/crashes --paths ~/SeriFuzz/results/concretization/candidate_paths
 ``` 
 
-- For a given concretized path, if you want to see what steps did Crystallizer take to create the concretized payload you can run the below command. Once the path gets successfully concretized, it creates `construction_steps` file inside `~/SeriFuzzz/jazzer/crashes` that details the steps taken by Crystallizer to concretize the chain.
+- For a given concretized path, if you want to see what steps did Crystallizer take to create the concretized payload you can run the below command. Once the path gets successfully concretized, it creates `construction_steps` file inside `~/SeriFuzz/jazzer/crashes` that details the steps taken by Crystallizer to concretize the chain.
 ```
 cd /root/SeriFuzz/src/dynamic
 ./triage_path.sh <concretized_path_id>
