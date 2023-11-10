@@ -1,0 +1,30 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = "analysis.BaseAnalysis"
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    implementation "joda-time:joda-time:2.2"
+    implementation "org.soot-oss:soot:4.3.0"
+    implementation "log4j:log4j:1.2.17"
+    implementation "org.slf4j:slf4j-nop:1.7.5"
+    implementation "org.jgrapht:jgrapht-core:1.5.0"
+    implementation "org.jgrapht:jgrapht-io:1.5.0"
+    testImplementation "junit:junit:4.12"
+}
+
+jar {
+    archiveBaseName = 'analysis-engine'
+    archiveVersion =  '0.1.0'
+}
+
+run {
+    enableAssertions = true
+}

@@ -1,0 +1,109 @@
+package com.example; 
+
+// import clojure.*;
+import com.code_intelligence.jazzer.api.FuzzedDataProvider;
+import java.io.*; 
+import java.lang.reflect.Constructor;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+
+public class SeriFuzz { 
+
+    public static void fuzzerTestOneInput(FuzzedDataProvider data) {
+	    Object obj = null;
+	    try {
+            	obj = objectFactory.createObject(data);
+            	entryPoint(obj);
+	    } catch (Exception e) {
+	    }
+    }
+
+    public static void entryPoint(Object inputObj) {
+        try { 
+            // Create a serialized object
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(inputObj);
+            oos.flush();
+            oos.close();
+            // Deserialize it
+            ByteArrayInputStream bis = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bis);
+            NormalObj unserObj = (NormalObj)ois.readObject();
+            ois.close();
+        } catch (IOException | ClassNotFoundException | ClassCastException ignored) {
+        }
+    }
+
+}
+
+class NormalObj implements Serializable{
+    public String name;
+    public NormalObj(String name){
+    this.name = name;
+    }
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
+        in.defaultReadObject();
+        System.out.println(this.name);
+    }
+}
+
+class objectFactory {
+
+    public static Object createObject(FuzzedDataProvider data) throws Exception {
+
+		Object obj = null;
+
+        // Deserialize the data bank
+        String[] clsBank = DataBank.clsBank;
+        int limit = DataBank.limit;
+
+        // Choose a random class 
+		int idx = ThreadLocalRandom.current().nextInt(0, clsBank.length); 
+		Class<?> aClass = Class.forName(clsBank[idx]);
+
+        // Choose a random constructor
+	    Constructor[] allConstructors = aClass.getDeclaredConstructors();
+        int constIdx = ThreadLocalRandom.current().nextInt(0, allConstructors.length);
+        Constructor ctor = allConstructors[constIdx];
+
+		Class<?>[] pType = ctor.getParameterTypes();
+		// Create a list of objects to pass to the constructor
+		Object[] cargs = new Object[pType.length];
+		for (int j = 0; j < pType.length; j++) {
+			if(pType[j].getName().equals("boolean")) {
+                cargs[j] = (Object)data.consumeBoolean();
+			} else if (pType[j].getName().equals("boolean[]")) {
+                cargs[j] = (Object)data.consumeBooleans(limit);
+			} else if (pType[j].getName().equals("byte")) {
+                cargs[j] = (Object)data.consumeByte();
+			} else if (pType[j].getName().equals("byte[]")) {
+                cargs[j] = (Object)data.consumeBytes(limit);
+			} else if (pType[j].getName().equals("short")) {
+                cargs[j] = (Object)data.consumeShort();
+			} else if (pType[j].getName().equals("short[]")) {
+                cargs[j] = (Object)data.consumeShorts(limit);
+			} else if (pType[j].getName().equals("int")) {
+                cargs[j] = (Object)data.consumeInt();
+			} else if (pType[j].getName().equals("int[]")) {
+                cargs[j] = (Object)data.consumeInts(limit);
+			} else if (pType[j].getName().equals("char")) {
+                cargs[j] = (Object)data.consumeChar();
+			} else if (pType[j].getName().equals("float")) {
+                cargs[j] = (Object)data.consumeRegularFloat();
+			} else if (pType[j].getName().equals("double")) {
+                cargs[j] = (Object)data.consumeRegularDouble();
+			} else if (pType[j].getName().equals("long")) {
+                cargs[j] = (Object)data.consumeLong();
+			} else if (pType[j].getName().equals("long[]")) {
+                cargs[j] = (Object)data.consumeLongs(limit);
+			} else if (pType[j].getName().equals("java.lang.String")) {
+                cargs[j] = (Object)data.consumeString(limit);
+			} else {
+                cargs[j] = (Object)null;
+		    }
+		}
+		obj = ctor.newInstance(cargs);
+		return obj;
+    }
+}

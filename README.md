@@ -33,8 +33,39 @@ python concretized_paths.py --concretized_ids ~/SeriFuzz/results/concretization/
 ``` 
     - The above script generates a file `concretized_paths.json` file containing the ID's along with the paths that were concretized.
 
-- For a given concretized path, if you want to see what steps did Crystallizer take to create the concretized payload you can run the below command.
+- For a given concretized path, if you want to see what steps did Crystallizer take to create the concretized payload you can run the below command. Once the path gets successfully concretized, it creates `construction_steps` file inside `~/SeriFuzzz/jazzer/crashes` that details the steps taken by Crystallizer to concretize the chain.
 ```
 cd /root/SeriFuzz/src/dynamic
 ./triage_path.sh <concretized_path_id>
 ```
+
+## Testing a new library
+
+When testing a new library the same commands as above can be run by just
+pointing to the new library to be analyzed as shown below. We propose running
+the sink identification for 1h and the probabilistic concretization module for
+24h.
+```
+./run_campaigns.sh /root/SeriFuzz/targets/newlibrary/newlibrary.jar 1h 24h
+```
+- Anytime during the course of the probabilistic conretization you can run the below command to see which paths are concretized
+```
+python concretized_paths.py --concretized_ids ~/SeriFuzz/jazzer/crashes --paths ~/SeriFuzz/jazzer/candidate_paths
+```
+
+In addition, Crystallizer allows a user to fine-tune which trigger gadgets are
+taken into consideration when performing its analysis and also customize which
+classes are analyzed as part of dynamic sink identification.
+
+- When testing a new library, the default trigger gadgets used are
+  corresponding to `toString` entrypoints. However, these can be easily
+  extended or modifed to consider other entry points corresponding. The current
+  supported entrypoints are `compare, hashCode, and invoke`. You can use either
+  or all by simply uncommenting the lines [here](). The static analysis module
+  has certain other customization that can be applied when creating the gadget
+  graph which can be exposed by creating a subclass of the class [here]()
+
+- During dynamic sink identification, the default behavior is to consider all
+  classes and their corresponding methods as potential sink candidates for
+  analysis. However, this can be fine-tuned to exclude certain classes from
+  consideration by creating a denylist [here]() 
