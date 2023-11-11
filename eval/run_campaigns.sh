@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Helper script to sequentially perform all the Crystallizer steps for a given target library
-# Usage ./run_campaigns.sh commons_collections3.1 1 1m 1m
+# Usage: ./run_campaigns.sh /root/SeriFuzz/targets/commons_collections3.1/commons-collections-3.1.jar 60 60 
 
 JARFILE=$1 # The library which is to be tested
 SINKID_TIMEOUT=$2 # The amount of time for which the sink identification phase is to be run
@@ -9,21 +9,21 @@ CONCRETIZATION_TIMEOUT=$3 # The amount of time for which the probabilistic concr
 
 source /etc/profile.d/gradle.sh
 
-LIBNAME=$(dirname "$JARFILE")
-echo $LIBNAME
+PARENTDIR=$(dirname "$JARFILE")
+LIBNAME=$(basename "$PARENTDIR")
 
 # Create the intermediate gadget graph (with no sinks marked)
 cd /root/SeriFuzz/src/static
 # rm -f *.store serifuzz.log* && gradle run --args="/root/SeriFuzz/targets/$LIB_NAME/$JARFILE initgraph"
-rm -f *.store serifuzz.log* && gradle run --args="$TARGET initgraph"
+rm -f *.store serifuzz.log* && gradle run --args="$JARFILE initgraph"
 
 # Perform the dynamic candidate sink identification
 cd /root/SeriFuzz/src/dynamic
-timeout $SINKID_TIMEOUT ./run_campaign.sh $CPU_CORE SinkID $LIB_NAME
+timeout $SINKID_TIMEOUT ./run_campaign.sh SinkID $LIBNAME
 
 # From the set of identified candidate sinks perform static filtering to cut down potential false positive sinks
 cd /root/SeriFuzz/src/static
-rm -f serifuzz.log* && gradle run --args="/root/SeriFuzz/targets/$LIB_NAME/$JARFILE sinkID /root/SeriFuzz/jazzer/crashes/potential_sinks"
+rm -f serifuzz.log* && gradle run --args="$JARFILE sinkID /root/SeriFuzz/jazzer/crashes/potential_sinks"
 
 # Collect the results from the sink ID and put them into the result dir
 cd /root/SeriFuzz/util
@@ -31,7 +31,7 @@ cd /root/SeriFuzz/util
 
 # Generate the final gadget graph (with the sinks marked)
 cd /root/SeriFuzz/src/static
-rm -f *.store serifuzz.log* && gradle run --args="/root/SeriFuzz/targets/$LIB_NAME/$JARFILE graph /root/SeriFuzz/jazzer/crashes/potential_sinks_processed.serialized"
+rm -f *.store serifuzz.log* && gradle run --args="$JARFILE graph /root/SeriFuzz/jazzer/crashes/potential_sinks_processed.serialized"
 
 # Ensure logging is turned on
 cp /root/SeriFuzz/src/dynamic/log4j_verbose.properties /root/SeriFuzz/src/dynamic/log4j.properties
@@ -44,7 +44,7 @@ cp /root/SeriFuzz/src/dynamic/log4j_nolog.properties /root/SeriFuzz/src/dynamic/
 
 # Run the probabilistic concretization campaign
 cd /root/SeriFuzz/src/dynamic
-timeout $CONCRETIZATION_TIMEOUT ./run_campaign.sh $CPU_CORE Fuzz $LIB_NAME
+timeout $CONCRETIZATION_TIMEOUT ./run_campaign.sh Fuzz $LIBNAME
 
 # Collect the results from concretization and put it into the result dir
 cd /root/SeriFuzz/util
