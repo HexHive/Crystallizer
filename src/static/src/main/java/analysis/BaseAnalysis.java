@@ -99,7 +99,7 @@ public class BaseAnalysis {
             LibAnalysis.libRules = new CoherenceRules();
         } else {
             LOGGER.debug("No matching rules found for a library, loading in default rules");
-            LibAnalysis.libRules = new LibSpecificRules();
+            LibAnalysis.libRules = new DefaultRules();
         }
 
         // Initial graph being generated that has no sinks specified.
