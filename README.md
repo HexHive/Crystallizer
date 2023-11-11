@@ -28,8 +28,8 @@ docker run --security-opt seccomp=unconfined --name crystallize_test -v $PWD/tar
 
 - Deploy a campaign which runs the entire pipeline from gadget graph creation to probabilistic concretization end-to-end. 
 ```
+cd eval
 # Scripts take three parameters: <absolute path to library file> <Time spent for dynamic sink ID> <Time spent for probabilistic concretization>
-
 ./run_campaigns.sh /root/SeriFuzz/targets/commons_collections3.1/commons-collections-3.1.jar 60 60
 ```
 - Once the above script finishes running, you can see which paths were concretized by running the command below. The below script generates a file `concretized_paths.json` file containing the ID's along with the paths that were concretized.
@@ -46,9 +46,10 @@ cd /root/SeriFuzz/src/dynamic
 ## Testing a new library
 
 When testing a new library the same commands as above can be run by just
-pointing to the new library to be analyzed as shown below. We propose running
-the sink identification for 1h and the probabilistic concretization module for
-24h.
+pointing to the new library to be analyzed as shown below. From the host, copy
+over the target library into `targets/` with the format
+`newlibrary/newlibrary.jar`. We propose running the sink identification for 1h
+and the probabilistic concretization module for 24h.
 ```
 ./run_campaigns.sh /root/SeriFuzz/targets/newlibrary/newlibrary.jar 1h 24h
 ```
