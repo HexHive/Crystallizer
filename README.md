@@ -1,4 +1,4 @@
-# Crytallizer
+# Crystallizer
 
 Crystallizer is a hybrid path analysis framework to aid in uncovering deserialization vulnerabilities. This work is published as part of FSE'23, the whitepaper for which can be found [here](https://prashast.github.io/publication/srivastava-crystallizer-2023/srivastava-crystallizer-2023.pdf).
 The artifact to reproduce the experiments presented in our paper are present in `artifact/`. Instructions to run a sample campaign and test a new target library are presented below.
