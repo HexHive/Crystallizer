@@ -50,9 +50,9 @@ class DefaultRules extends LibSpecificRules {
 
     void initializeEntryPoints() {
         LibAnalysis.entryPoints.add("toString");
-        // LibAnalysis.entryPoints.add("compare");
-        // LibAnalysis.entryPoints.add("hashCode");
-        // LibAnalysis.entryPoints.add("invoke");
+        LibAnalysis.entryPoints.add("compare");
+        LibAnalysis.entryPoints.add("hashCode");
+        LibAnalysis.entryPoints.add("invoke");
     }
 }
 
